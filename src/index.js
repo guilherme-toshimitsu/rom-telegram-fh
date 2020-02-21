@@ -2,28 +2,55 @@ const app = require("express")();
 const server = require("http").createServer(app);
 const expressParser = require("body-parser");
 const bot = require("./worker/telegramBot");
-const { parserName } = require("./utils/parsePoringData");
+const { parserName, parseSnapping } = require("./utils/parsePoringData");
 const { getPoring } = require("./services/poringWorld");
 
 bot.on("message", msg => {
   if (msg.text.startsWith("+bot")) {
+    let snapping = false;
+    let refining = false;
+    let refininglvl = 0;
+    let query = msg.text.replace("+bot ", "");
+    if (query.includes("snapping")) {
+      query = query.replace("snapping", "");
+      snapping = true;
+    }
+    if (query.includes("refine:")) {
+      let pos = query.indexOf("refine:");
+      query = query.replace("refine:", "");
+      refininglvl = query.slice(pos, pos + 2);
+      query = query.slice(0, pos) + " " + query.slice(pos + 2);
+      refining = true;
+    }
+    query = query.replace(/ +(?= )/g, "");
+    if (query.charAt(query.length - 1) === " ") {
+      query = query.slice(0, query.length - 1);
+    }
+    console.log(query);
     const params = {
       order: "popularity",
       inStock: 1,
-      q: msg.text.replace("+bot ", "")
+      q: query
     };
+    bot.sendMessage("-225462163", "buscando dados...");
     getPoring(params)
-      .then(data => {
-        const dados = parserName(data);
+      .then(res => {
+        let data = res;
+        if (snapping) {
+          data = parseSnapping(data);
+        }
+        if (refining) {
+          data = data.filter(item => item.name.includes(`+${refininglvl}`));
+        }
+        let dados = parserName(data);
         const dadosProntos = dados.map(
           item => `${item.name} a ${item.price} Zeny`
         );
-        const message =
-          "Itens em snapping com morale 4: \n " + dadosProntos.join("\n");
+        const message = `Itens: \n ` + dadosProntos.join("\n");
         bot.sendMessage("-225462163", message);
       })
       .catch(err => {
-        console.log("erroooo");
+        bot.sendMessage("-225462163", "falhou na busca");
       });
   }
 });
