@@ -1,0 +1,20 @@
+{
+  "name": "rom-telegram-fh",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "NODE_ENV=dev DEBUG=mquery nodemon --inspect src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "express": "^4.17.1",
+    "mongoose": "^5.9.1",
+    "node-telegram-bot-api": "^0.40.0",
+    "nodemon": "^2.0.2",
+    "query-string": "^6.11.0"
+  }
+}

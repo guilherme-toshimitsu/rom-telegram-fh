@@ -1,0 +1,26 @@
+version: "3.1"
+
+services:
+  app:
+    container_name: rom-telegram-fh
+    restart: always
+    build: ./
+    ports:
+      - "80:3000"
+    volumes:
+      - .:/app
+    links:
+      - mongodb
+
+  mongodb:
+    container_name: mongo
+    image: mongo
+    ports:
+      - "27017:27017"
+    # environment:
+    #   - MONGODB_USERNAME=mongoadmin
+    #   - MONGODB_PASSWORD=secret
+    #   - MONGODB_DATABASE=my_db
+    #   - MONGODB_ADVERTISED_HOSTNAME=mongodb
+    #   - MONGODB_REPLICA_SET_MODE=primary
+    #   - MONGODB_ROOT_PASSWORD=password123
