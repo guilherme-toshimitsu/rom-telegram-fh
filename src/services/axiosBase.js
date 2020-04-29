@@ -6,15 +6,15 @@ const getApiConfig = () => ({
     Accept: "application/json",
     "Accept-Language": "pt-BR",
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Credentials": "true"
-  }
+    "Access-Control-Allow-Credentials": "true",
+  },
 });
 
 const base = (baseURL, config) => {
   const api = axios.create({
     mode: "cors",
     baseURL,
-    ...config
+    ...config,
   });
 
   const axiosRequest = api.request;
@@ -24,9 +24,9 @@ const base = (baseURL, config) => {
       url: path,
       ...getApiConfig(),
       ...options,
-      paramsSerializer: params =>
-        qs.stringify(params, { arrayFormat: "repeat" })
-    }).then(res => res.data);
+      paramsSerializer: (params) =>
+        qs.stringify(params, { arrayFormat: "repeat" }),
+    }).then((res) => res.data);
   };
 
   return api;
