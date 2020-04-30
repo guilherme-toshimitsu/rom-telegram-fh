@@ -3,11 +3,14 @@ const server = require("http").createServer(app);
 const expressParser = require("body-parser");
 
 const bot = require("./worker/telegramBot");
-const botSearch = require("./utils/queryBuilder");
+const { botQuery, getDataFromPoringWorld } = require("./utils/queryBuilder");
 
-bot.on("message", (msg) => {
+bot.on("message", async (msg) => {
   if (msg.text.startsWith("+bot")) {
-    botSearch(msg.text);
+    let params = botQuery(msg.text);
+    bot.sendMessage("-225462163", "Iniciando Busca");
+    let responseMessage = await getDataFromPoringWorld(params, msg.text);
+    bot.sendMessage("-225462163", responseMessage);
   }
 });
 const connectMongo = require("./utils/mongoose");

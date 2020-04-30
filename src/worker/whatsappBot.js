@@ -5,7 +5,7 @@ const playerController = require("../controllers/players");
 const warAtt = require("../controllers/war");
 const moment = require("moment");
 const googleApi = require("../worker/googleApi");
-const { promisify } = require("util");
+const { botQuery, getDataFromPoringWorld } = require("../utils/queryBuilder");
 
 const { findClass, findAllClasses } = require("../controllers/classes");
 
@@ -67,7 +67,6 @@ const listener = async (req, res, next) => {
   }
 
   if (message.includes("+war")) {
-    console.log(celphone);
     const player = await playerController.findPlayersByCelphone(celphone);
     if (!player.length) {
       twiml.message(
@@ -76,10 +75,10 @@ const listener = async (req, res, next) => {
       return res.status(200).send(twiml.toString());
     }
     const weekday = moment().format("dddd");
-    // if (weekday !== "Sunday" || weekday !== "Thursday") {
-    //   twiml.message("hoje nao e dia de guerra");
-    //   return res.status(200).send(twiml.toString());
-    // }
+    if (weekday !== "Sunday" || weekday !== "Thursday") {
+      twiml.message("hoje nao e dia de guerra");
+      return res.status(200).send(twiml.toString());
+    }
 
     try {
       const attendancy = await warAtt.markAtendancy(player);
@@ -109,6 +108,20 @@ const listener = async (req, res, next) => {
     await sheet.addRows(data);
 
     twiml.message("Planilha atualizada");
+    return res.status(200).send(twiml.toString());
+  }
+
+  if (message.includes("+store")) {
+    const player = await playerController.findPlayersByCelphone(celphone);
+    if (!player.length) {
+      twiml.message(
+        "player nao cadastrado, utilizar o seguinte comando \n +update +name(Seu Player Nick entre parentesis) +level(Seu level entre parentesis) +classe(Sua classe aqui) \n \n para mais informacoes sobre os nomes utilizados das classes digite +alljobs"
+      );
+      return res.status(200).send(twiml.toString());
+    }
+    let params = botQuery(message);
+    let responseMessage = await getDataFromPoringWorld(params, message);
+    twiml.message(responseMessage);
     return res.status(200).send(twiml.toString());
   }
 };

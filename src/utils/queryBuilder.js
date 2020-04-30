@@ -51,18 +51,12 @@ const botQuery = (msg) => {
   let name;
   let refine;
   let enchant;
-  // let order;
-  let maxprice;
-  let minprice;
   let broken;
-  let snapping;
+
   name = hasName(msg);
   refine = hasRefine(query);
   enchant = hasEnchant(query);
-  maxprice = hasMaxPrice(query);
-  minprice = hasMinPrice(query);
   broken = isBroken(query);
-  snapping = isSnapping(query);
 
   let newQuery = queryBuilder(name, refine, enchant, broken);
 
@@ -75,25 +69,49 @@ const botQuery = (msg) => {
     modified: null,
     q: newQuery,
   };
-  bot.sendMessage("-225462163", "buscando dados...");
-  getPoring(params)
-    .then((res) => {
-      let message;
-      let dados = postQueryResolver(res, maxprice, minprice, snapping);
-      if (dados.length) {
-        const dadosProntos = dados.map(
-          (item) => `${item.name} a ${item.lastRecord.price} Zeny`
-        );
-        message = `Itens: \n ` + dadosProntos.join("\n");
-      } else {
-        message = "Item nao encontrado";
-      }
-
-      bot.sendMessage("-225462163", message);
-    })
-    .catch((err) => {
-      bot.sendMessage("-225462163", "falhou na busca");
-    });
+  return params;
 };
 
-module.exports = botQuery;
+const getDataFromPoringWorld = async (params, msg) => {
+  let snapping = isSnapping(query);
+  let maxprice = hasMaxPrice(query);
+  let minprice = hasMinPrice(query);
+  let message;
+
+  try {
+    let response = getPoring(params);
+    let dados = postQueryResolver(response, maxprice, minprice, snapping);
+    if (dados.length) {
+      const dadosProntos = dados.map(
+        (item) => `${item.name} a ${item.lastRecord.price} Zeny`
+      );
+      message = `Itens: \n ` + dadosProntos.join("\n");
+    } else {
+      message = "Item nao encontrado";
+    }
+  } catch (err) {
+    message = "falhou na busca";
+  }
+
+  return message;
+  // .then((res) => {
+  //   if (dados.length) {
+  //     const dadosProntos = dados.map(
+  //       (item) => `${item.name} a ${item.lastRecord.price} Zeny`
+  //     );
+  //     message = `Itens: \n ` + dadosProntos.join("\n");
+  //   } else {
+  //     message = "Item nao encontrado";
+  //   }
+
+  //   bot.sendMessage("-225462163", message);
+  // })
+  // .catch((err) => {
+  //   bot.sendMessage("-225462163", "falhou na busca");
+  // });
+};
+
+module.exports = {
+  botQuery,
+  getDataFromPoringWorld,
+};
